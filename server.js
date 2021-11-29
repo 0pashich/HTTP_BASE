@@ -103,7 +103,7 @@ const requestListener = (req, res) => {
                 if (request_data.username === user.username && request_data.password === user.password) {
                     let date = new Date();
                     date.setTime(date.getTime() + (2 * 24 * 60 * 60 * 1000));
-                    let expires = "expires=" + date.toGMTString();
+                    let expires = "expires=" + date.toUTCString();
                     res.writeHead(200, {
                         'Set-Cookie': [
                             `userId=${user.id}; Domain=.${host}; Path=/; ${expires}`,
