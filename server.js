@@ -6,6 +6,13 @@ const port = 8000;
 const path = ('./files');
 
 
+const user = {
+    id: 123,
+    username: 'testuser',
+    password: 'qwerty'
+};
+
+
 const requestListener = (req, res) => {
     if (req.url === '/get') {
         if (req.method === 'GET') {
@@ -46,6 +53,31 @@ const requestListener = (req, res) => {
     } else if (req.url === '/redirected' && req.method === 'GET') {
         res.writeHead(200);
         res.end('redirected page');
+    } else if (req.url === '/auth') {
+        if (req.method === 'POST') {
+            console.log(req.headers);
+
+            let data = '';
+            req.on('data', chunk => {
+                data += chunk;
+            })
+            req.on('end', () => {
+                console.log(JSON.parse(data)); // 'Buy the milk'
+                res.end();
+            })
+
+
+            //  console.log(req.headers);
+
+            res.writeHead(200);
+            res.end('success');
+
+
+
+        } else {
+            res.writeHead(405);
+            res.end('HTTP method not allowed');
+        }
     } else {
         res.writeHead(404);
         res.end('not found');
