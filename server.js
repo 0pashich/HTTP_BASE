@@ -55,22 +55,55 @@ const requestListener = (req, res) => {
         res.end('redirected page');
     } else if (req.url === '/auth') {
         if (req.method === 'POST') {
-            console.log(req.headers);
 
+            //console.log(req.headers);
+            console.log(req.headers['content-type']);
+            console.log(req.headers['content-length']);
             let data = '';
+            let request_data = {};
+            let username = '';
+            let password = '';
             req.on('data', chunk => {
                 data += chunk;
             })
+
             req.on('end', () => {
+                request_data.username = JSON.parse(data).username;
+                request_data.password = JSON.parse(data).password;
+                if (user.username === JSON.parse(data).username) { console.log('username') }
+                if (user.password === JSON.parse(data).password) { console.log('password') }
                 console.log(JSON.parse(data)); // 'Buy the milk'
-                res.end();
+                //  res.end();
+
+
+                console.log('username', username);
+                console.log('pas', password);
+                //request_data = JSON.parse(data)
+                console.log(123, request_data);
+                if (request_data.username === user.username && request_data.password === user.password) {
+                    console.log(`userId=${user.id}; max_age=172800; domain=.localhost;`);
+                    res.writeHead(200, {
+                        'Set-Cookie': `userId=${user.id}; authorized=true; max_age=172800; domain=.localhost;`
+                    });
+                    res.end('OK');
+
+                } else {
+                    res.writeHead(400);
+                    res.end('Неверный логин или пароль');
+                }
+                //console.log(req.headers);
+
+
+
+
+
+
+
+
+
+
+
             })
-
-
-            //  console.log(req.headers);
-
-            res.writeHead(200);
-            res.end('success');
 
 
 
