@@ -31,8 +31,8 @@ const requestListener = (req, res) => {
         }
     } else if (req.url === '/delete') {
         if (req.method === 'DELETE') {
-            let reg = new RegExp(`userId=(${user.id})\b`, 'ig');
-            if (req.headers.cookie.match(/authorized=(true)/ig) !== null && req.headers.cookie.match(reg) !== null) {
+            let reg = new RegExp(`userId=(${user.id})\\b`, 'ig');
+            if (req.headers.cookie.match(/authorized=(true)\b/ig) !== null && req.headers.cookie.match(reg) !== null) {
                 let data = '';
                 let request_data = {};
                 req.on('data', chunk => { data += chunk; })
@@ -58,8 +58,8 @@ const requestListener = (req, res) => {
         }
     } else if (req.url === '/post') {
         if (req.method === 'POST') {
-            let reg = new RegExp(`userId=(${user.id})\b`, 'ig');
-            if (req.headers.cookie.match(/authorized=(true)/ig) !== null && req.headers.cookie.match(reg) !== null) {
+            let reg = new RegExp(`userId=(${user.id})\\b`, 'ig');
+            if (req.headers.cookie.match(/authorized=(true)\b/ig) !== null && req.headers.cookie.match(reg) !== null) {
                 let data = '';
                 let request_data = {};
                 req.on('data', chunk => { data += chunk; })
