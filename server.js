@@ -31,16 +31,55 @@ const requestListener = (req, res) => {
         }
     } else if (req.url === '/delete') {
         if (req.method === 'DELETE') {
-            res.writeHead(200);
-            res.end('success');
+            let reg = new RegExp(`userId=(${user.id})\b`, 'ig');
+            if (req.headers.cookie.match(/authorized=(true)/ig) !== null && req.headers.cookie.match(reg) !== null) {
+                let data = '';
+                let request_data = {};
+                req.on('data', chunk => { data += chunk; })
+                req.on('end', () => {
+                    request_data.filename = JSON.parse(data).filename;
+                    fs.unlink(path + '/' + request_data.filename, (err) => {
+                        if (err) {
+                            res.writeHead(500);
+                            res.end(`Internal Server Error`);
+                        } else {
+                            res.writeHead(200);
+                            res.end(`Deleted file ${request_data.filename}`);
+                        }
+                    });
+                })
+            } else {
+                res.writeHead(401);
+                res.end('Unauthorized');
+            }
         } else {
             res.writeHead(405);
             res.end('HTTP method not allowed');
         }
     } else if (req.url === '/post') {
         if (req.method === 'POST') {
-            res.writeHead(200);
-            res.end('success');
+            let reg = new RegExp(`userId=(${user.id})\b`, 'ig');
+            if (req.headers.cookie.match(/authorized=(true)/ig) !== null && req.headers.cookie.match(reg) !== null) {
+                let data = '';
+                let request_data = {};
+                req.on('data', chunk => { data += chunk; })
+                req.on('end', () => {
+                    request_data.filename = JSON.parse(data).filename;
+                    request_data.content = JSON.parse(data).content;
+                    fs.writeFile(path + '/' + request_data.filename, request_data.content, (err) => {
+                        if (err) {
+                            res.writeHead(500);
+                            res.end(`Internal Server Error`);
+                        } else {
+                            res.writeHead(200);
+                            res.end(`Create file ${request_data.filename}`);
+                        }
+                    });
+                })
+            } else {
+                res.writeHead(401);
+                res.end('Unauthorized');
+            }
         } else {
             res.writeHead(405);
             res.end('HTTP method not allowed');
@@ -55,58 +94,33 @@ const requestListener = (req, res) => {
         res.end('redirected page');
     } else if (req.url === '/auth') {
         if (req.method === 'POST') {
-
-            //console.log(req.headers);
-            console.log(req.headers['content-type']);
-            console.log(req.headers['content-length']);
             let data = '';
             let request_data = {};
-            let username = '';
-            let password = '';
-            req.on('data', chunk => {
-                data += chunk;
-            })
-
+            req.on('data', chunk => { data += chunk; })
             req.on('end', () => {
                 request_data.username = JSON.parse(data).username;
                 request_data.password = JSON.parse(data).password;
-                if (user.username === JSON.parse(data).username) { console.log('username') }
-                if (user.password === JSON.parse(data).password) { console.log('password') }
-                console.log(JSON.parse(data)); // 'Buy the milk'
-                //  res.end();
-
-
-                console.log('username', username);
-                console.log('pas', password);
-                //request_data = JSON.parse(data)
-                console.log(123, request_data);
                 if (request_data.username === user.username && request_data.password === user.password) {
-                    console.log(`userId=${user.id}; max_age=172800; domain=.localhost;`);
+                    let date = new Date();
+                    date.setTime(date.getTime() + (2 * 24 * 60 * 60 * 1000));
+                    let expires = "expires=" + date.toGMTString();
                     res.writeHead(200, {
-                        'Set-Cookie': `userId=${user.id}; authorized=true; max_age=172800; domain=.localhost;`
+                        'Set-Cookie': [
+                            `userId=${user.id}; Domain=.localhost; Path=/; ${expires}`,
+                            `authorized=true; Domain=.localhost; Path=/; ${expires}`,
+                        ]
                     });
+                    // Domain=.localhost не работает с суб доменами. Необходима вторая точка в домене
+                    // Тоесть Domain=.localhost не сработает на www.localhost
+                    // А Domain=.www.localhost работает на abc.www.localhost
+                    // К сожалению это ограничение стандарта
+                    // Если есть решение, прошу написать в коментариях
                     res.end('OK');
-
                 } else {
                     res.writeHead(400);
                     res.end('Неверный логин или пароль');
                 }
-                //console.log(req.headers);
-
-
-
-
-
-
-
-
-
-
-
             })
-
-
-
         } else {
             res.writeHead(405);
             res.end('HTTP method not allowed');
