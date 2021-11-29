@@ -106,8 +106,8 @@ const requestListener = (req, res) => {
                     let expires = "expires=" + date.toGMTString();
                     res.writeHead(200, {
                         'Set-Cookie': [
-                            `userId=${user.id}; Domain=.localhost; Path=/; ${expires}`,
-                            `authorized=true; Domain=.localhost; Path=/; ${expires}`,
+                            `userId=${user.id}; Domain=.${host}; Path=/; ${expires}`,
+                            `authorized=true; Domain=.${host}; Path=/; ${expires}`,
                         ]
                     });
                     // Domain=.localhost не работает с суб доменами. Необходима вторая точка в домене
